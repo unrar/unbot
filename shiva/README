@@ -1,0 +1,17 @@
+-*-*-*-*-*-*-*
+    Shiva
+-*-*-*-*-*-*-*
+
+Shiva is the Testing version of UnBot. Actually, it's written in Python. 
+It'll become stable when all the actual features of Sybil are added to Shiva.
+
+Once all the actual Sybil bugs are fixed, its development will be frozen and
+we will focus on porting all its features to Shiva. Then, Sybil will become
+Hattie (old-stable) and Shiva will become Stable, and a new version will be
+testing.
+
+NAMES AFTER FROZENING:
+
+Sybil (stable)   -> Mary (old-stable)
+Shiva (unstable) -> Shiva (stable)
+( void )         -> Hattie (unstable)
