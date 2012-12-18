@@ -2,8 +2,20 @@ UnBot is an IRC bot for Wikipedia projects. At the moment, it's not much
 configurable at the moment, but it's usable for the spanish wikipedia by
 default. It also uses the UNDB project, see its repo for further information.
 
-Current Stable: Sybil 2012.12.16
-Current Testing: Shiva -
+Current Stable: Sybil 2012.12.16 ***PRE-FROZEN***
+Current Testing: Shiva 2012.12.18b
 Current Unstable: Peggy -
 Current Pseudocode: Marcia 2012.12.15
 
+***IMPORTANT ANNOUNCEMENT***
+Sybil (master, stable) branch will be frozen when ALL the current bugs are
+fixed. That means that no new features will be added to Sybil, it'll change
+its name to Mary and it'll become old-stable. During this frozen time, which
+may be about a week or a month, all the Sybil features will be ported to
+Shiva. After they're ported, Shiva will become stable, and a new testing
+branch, called Hattie, will be launched. Read more about this at Shiva's 
+README.
+IMPORTANT NOTE: Hattie will be Python also, no language changes will happen
+on this release cycle, perhaps only on Peggy (unstable). We'll focus on
+adding new features to Shiva, and Sybil's support will end when Shiva has ALL
+what Sybil (Mary) had.
