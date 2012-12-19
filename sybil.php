@@ -8,16 +8,17 @@ require("udb_connector.php");
 //Primero, configuramos las variables
 $host = "irc.freenode.net"; //Conectamos a FreeNode
 $port = 6667; //Puerto 6667
-$nick = "unbot";
+$nick = "iUnbot";
 $ident = "unbotillo";
 $realname = "Sybil 2012.12.17b + UNDB Sybil 2012.12.16";
-$passwd = "openaccess";
+$passwd = "croqueta";
 //Dueño (máscara)
 $owner = "wikimedia\/unrar";
 //Canal al que entraremos
 $chan = "#wikipedia-es-bots";
 // Canales
-$chans = array("#wikipedia-es", "#sandyd", "#undb", "#undb-es");
+$chans = array("#undb");
+#$chans = array("#wikipedia-es", "#sandyd", "#undb", "#undb-es");
 // Prevenimos el timelimit de PHP
 echo "Conectando a ".$host."...\n";
 // Abrimos el socket
@@ -747,13 +748,16 @@ while(1) {
 									fputs($socket, "PRIVMSG ".$ex[2]." :Usuaria es ".chr(2).$nombre.chr(2)." (id: ".chr(2).$userid.chr(2)."). Ediciones: ".chr(2).$ediciones.chr(2).". Registrada: ".$registro.". Género: ".$genero.". Grupos: ".$gup."\n");
 								}
 								//TODO: Nicks asociados: $u_nicks DONE
+								
+								//Creamos $p_nombre con los paréntesis aptos para parseo.
+								$p_nombre = p_chars( $nombre );
 								$u_nicks = array();
 								$un = new UDB_Connector();
 								$un->connect("nas.udb");
 								$unl = file("cache.ucb");
 								foreach ($unl as $uline) {
 									$expl = explode("~!", trim($uline));
-									if ($expl[0] == $nombre) {
+									if ($expl[0] == $p_nombre) {
 										array_shift($expl);
 										foreach ($expl as $expln) {
 											array_push($u_nicks, $expln);
@@ -765,6 +769,8 @@ while(1) {
 								} else {
 									$smoc = "N/A";
 								}
+								// Ponemos bien los paréntesis en $smoc
+								$smoc = dp_chars($smoc);
 								fputs($socket, "PRIVMSG ".$ex[2]." :Nicks asociados: ".chr(2).$smoc.chr(2).".\n");
 								break;
 							}
@@ -816,6 +822,20 @@ function nick_exists_udb( $nick ) {
 	// Guardamos 
 	$un->save("nas.udb");
 	end:
+}
+
+// Función para eliminar carácteres 'raros'
+function p_chars( $text ) {
+	$m_text = str_replace("(", "\(", $text);
+	$m_text = str_replace(")", "\)", $m_text);
+	return $m_text;
+}
+
+// Función para descodificar p_chars
+function dp_chars( $text ) {
+	$m_text = str_replace("\(", "(", $text);
+	$m_text = str_replace("\)", ")", $m_text);
+	return $m_text;
 }
 
 ?>
