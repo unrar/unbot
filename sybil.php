@@ -153,6 +153,8 @@ while(1) {
 						$nas_line = fgets($udb_nas);
 						$nas_expl = explode('~!', $nas_line);
 						foreach ($nas_expl as $nas_vnick) {
+							// Unparse $nas_vnick
+							$nas_vnick = dp_chars($nas_vnick);
 							if (trim($nas_vnick) == $mask[0]) $nas_found = true;
 							array_push($nas_nicks, trim($nas_vnick)); 
 						}
@@ -171,7 +173,7 @@ while(1) {
 					fclose($udb_nas);
 					narizend:
 				} else {
-					$udb_ne = nick_exists_udb($mask[0]);
+					$udb_ne = nick_exists_udb(p_chars($mask[0]));
 					if ($udb_ne != false) {
 						fputs($socket, "PRIVMSG ".$ex[2]." :Lo siento, el nick ".chr(3)."12".$mask[0].chr(15)." ya está asignado a una cuenta.\n");
 					} else {
@@ -181,8 +183,12 @@ while(1) {
 						if ($uu_cc == false) goto narizend2;
 						$found = false;
 						$pudb_wnas = file('cache.ucb');
+						//Convertimos los paréntesis de la cuenta
+						$c_acc = str_replace("(", "\(", $ex[4]);
+						$c_acc = str_replace(")", "\)", $c_acc);
+						echo "PARSED ACCOUNT: ".$c_acc."\n";
 						foreach ($pudb_wnas as $lineNumber => $line) {
-							if (preg_match("/".$ex[4]."~!/i",$line) != false) {
+							if (preg_match("/".$c_acc."~!/i",$line) != false) {
 								$found = true;
 								#$lineNumber++;
 								break;
@@ -196,7 +202,7 @@ while(1) {
 							file_put_contents( 'cache.ucb' , implode( "\n", $lines ) );
 						} else {
 						$udb_wnas = fopen("cache.ucb", "a+");
-						fwrite($udb_wnas, "\n".$ex[4]."~!".$mask[0]);
+						fwrite($udb_wnas, p_chars($ex[4])."~!".$mask[0]."\n");
 						fclose($udb_wnas);
 						}
 						fputs($socket, "PRIVMSG ".$ex[2]." :Añadido correctamente tu nick ".chr(3)."12".$mask[0].chr(15)." a la cuenta ".$ex[4].".\n");
@@ -828,14 +834,14 @@ function nick_exists_udb( $nick ) {
 function p_chars( $text ) {
 	$m_text = str_replace("(", "\(", $text);
 	$m_text = str_replace(")", "\)", $m_text);
-	return $m_text;
+	return trim($m_text);
 }
 
 // Función para descodificar p_chars
 function dp_chars( $text ) {
 	$m_text = str_replace("\(", "(", $text);
 	$m_text = str_replace("\)", ")", $m_text);
-	return $m_text;
+	return trim($m_text);
 }
 
 ?>
