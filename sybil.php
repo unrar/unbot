@@ -8,7 +8,7 @@ require("udb_connector.php");
 //Primero, configuramos las variables
 $host = "irc.freenode.net"; //Conectamos a FreeNode
 $port = 6667; //Puerto 6667
-$nick = "iUnbot";
+$nick = "unbot";
 $ident = "unbotillo";
 $realname = "Sybil 2012.12.17b + UNDB Sybil 2012.12.16";
 $passwd = "openaccess";
