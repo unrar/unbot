@@ -182,27 +182,16 @@ while(1) {
 						$uu_cc = $uu->connect("nas.udb");
 						if ($uu_cc == false) goto narizend2;
 						$found = false;
-						$pudb_wnas = file('cache.ucb');
-						//Convertimos los paréntesis de la cuenta
-						$c_acc = str_replace("(", "\(", $ex[4]);
-						$c_acc = str_replace(")", "\)", $c_acc);
-						echo "PARSED ACCOUNT: ".$c_acc."\n";
-						foreach ($pudb_wnas as $lineNumber => $line) {
-							if (preg_match("/".$c_acc."~!/i",$line) != false) {
-								$found = true;
-								#$lineNumber++;
-								break;
-							}
+						$pudb_wnas = file($file, FILE_IGNORE_NEW_LINES);
+						$nick = $mask[0];
+						foreach ( $pudb_wnas as $k => &$line ) {
+							$found = preg_match(sprintf("/^%s~/", preg_quote($ex[4])), $line) and $line = sprintf("%s~!%s", $line, $nick);
 						}
 						if ($found) {
-						echo "!!!!!!!!!!!!!!!!FOUND!!!!!!!!!!!!!!!!!!\n";
-							$lines = file( 'cache.ucb' , FILE_IGNORE_NEW_LINES );
-							$wnas_bu = $lines[$lineNumber];
-							$lines[$lineNumber] = trim($wnas_bu)."~!".$mask[0];
-							file_put_contents( 'cache.ucb' , implode( "\n", $lines ) );
+							file_put_contents($file, implode(PHP_EOL, $pudb_wnas));
 						} else {
 						$udb_wnas = fopen("cache.ucb", "a+");
-						fwrite($udb_wnas, p_chars($ex[4])."~!".$mask[0]."\n");
+						fwrite($udb_wnas, preg_quote($ex[4])."~!".$mask[0]."\n");
 						fclose($udb_wnas);
 						}
 						fputs($socket, "PRIVMSG ".$ex[2]." :Añadido correctamente tu nick ".chr(3)."12".$mask[0].chr(15)." a la cuenta ".$ex[4].".\n");
