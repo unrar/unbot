@@ -57,8 +57,11 @@ while True:
    command = command.replace(chr(13), '')
    ex = command.split()
    # achan => actual channel
-   if ex[2]:
+   try:
       achan = ex[2]
+      break
+   except IndexError, e:
+      pass
    aparams = ex[3:]
    aparams = ' '.join(aparams)
    params = ex[4:]
