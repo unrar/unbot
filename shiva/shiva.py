@@ -30,6 +30,8 @@ chan = '##bots-debug'
 chans = ["#sandyd", "#undb", "#undb-es", "#wikipedia-es-bots"]
 # Dueño
 owner = "wikimedia/unrar"
+# Mensaje de error de permisos
+perror = "¿Pero quién eres? ¡No estás autorizado a usar este comando!"
 
 ###################
 #    Funciones    #
@@ -37,7 +39,8 @@ owner = "wikimedia/unrar"
 
 def privmsg(target, text):
    irc.send ("PRIVMSG " + target + " :" + text + "\r\n")
-
+def sc (cmd):
+   irc.send (cmd + "\r\n")
 # Creamos el socket "irc"
 irc = socket.socket ( socket.AF_INET, socket.SOCK_STREAM )
 # Lo conectamos
@@ -61,8 +64,6 @@ while True:
       achan = ex[2]
    except IndexError:
       pass
-   aparams = ex[3:]
-   aparams = ' '.join(aparams)
    params = ex[4:]
    rparams = ' '.join(params)
    if ex[0] == "PING":
@@ -72,23 +73,45 @@ while True:
       # mask[0] => nick
       # mask[1] => ident@host
       mask = masktemp.split('!')
+      # Independent cloak
+      cloak = mask[1].split('@')
+      cloak = cloak[1]
       print ("@Debug: Mask[0] => " + mask[0] + "\n")
       print ("@Debug: Mask[1] => " + mask[1] + "\n")
+      
       # Queries
       if ex[2].lower() == nick.lower():
          locparams = ' '.join(params)
          tempsp = ex[3].split(':')
          tempsp = tempsp[1:]
          primera = ':'.join(tempsp)
+         
       # @Debug: Test command
-      if ex[3] == ":&test":
+      if ex[3].lower() == ":&test":
          privmsg (achan, "Prueba recibida, gracias.")
+         
       # Quit command for shiva
       if (' '.join(ex[3:5]).lower() == ':%shiva quit') or (ex[3] == ":&quit"):
-         if mask[1].find(owner) != -1:
+         if cloak.find(owner) != -1:
             privmsg (achan, "OK, habrá que irse...")
-            irc.send ( 'QUIT :I don\'t like to live on a yellow submarine...\r\n' )
+            sc ( 'QUIT :I don\'t like to live on a yellow submarine...' )
          else:
-            privmsg (achan, "¿Pero quién eres? ¡No estás autorizado a usar este comando!")
-         
+            privmsg (achan, perror)
+      # Join command
+      if ex[3].lower() == ":&join":
+         if cloak.find(owner) != -1:
+            privmsg (achan, "Entrando a " + ex[4] + "...")
+            sc("JOIN " + ex[4])
+         else:
+            privmsg (achan, perror)
+      
+      # Part command
+      if ex[3].lower() == ":&part":
+         if cloak.find(owner) != -1:
+            privmsg (achan, "Saliendo de " + ex[4] + "...")
+            sc("PART " + ex[4] + " :Part ordenado por " + mask[0])
+         else:
+            privmsg (achan, perror)
+      
+      
    print data
