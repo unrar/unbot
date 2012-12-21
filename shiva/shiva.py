@@ -29,7 +29,7 @@ chan = '##bots-debug'
 # Canales a entrar
 chans = ["#sandyd", "#undb", "#undb-es", "#wikipedia-es-bots"]
 # Dueño
-owner = "wikimedia\/unrar"
+owner = "wikimedia/unrar"
 
 ###################
 #    Funciones    #
@@ -80,9 +80,15 @@ while True:
          tempsp = ex[3].split(':')
          tempsp = tempsp[1:]
          primera = ':'.join(tempsp)
-      if ex[3] == ":%test":
+      # @Debug: Test command
+      if ex[3] == ":&test":
          privmsg (achan, "Prueba recibida, gracias.")
-   if ' '.join(ex[3:5]).lower() == '%shiva quit':
-      privmsg (achan, "OK, habrá que irse...")
-      irc.send ( 'QUIT\r\n' )
+      # Quit command for shiva.
+      if (' '.join(ex[3:5]).lower() == ':%shiva quit') or (ex[3] == ":&quit"):
+         if mask[1].find(owner) != -1:
+            privmsg (achan, "OK, habrá que irse...")
+            irc.send ( 'QUIT\r\n' )
+         else:
+            privmsg (achan, "¿Pero quién eres? ¡No estás autorizado a usar este comando!")
+         
    print data
