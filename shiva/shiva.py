@@ -83,11 +83,11 @@ while True:
       # @Debug: Test command
       if ex[3] == ":&test":
          privmsg (achan, "Prueba recibida, gracias.")
-      # Quit command for shiva.
+      # Quit command for shiva
       if (' '.join(ex[3:5]).lower() == ':%shiva quit') or (ex[3] == ":&quit"):
          if mask[1].find(owner) != -1:
             privmsg (achan, "OK, habrá que irse...")
-            irc.send ( 'QUIT\r\n' )
+            irc.send ( 'QUIT :I don\'t like to live on a yellow submarine...\r\n' )
          else:
             privmsg (achan, "¿Pero quién eres? ¡No estás autorizado a usar este comando!")
          
