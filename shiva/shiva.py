@@ -59,8 +59,7 @@ while True:
    # achan => actual channel
    try:
       achan = ex[2]
-      break
-   except IndexError, e:
+   except IndexError:
       pass
    aparams = ex[3:]
    aparams = ' '.join(aparams)
