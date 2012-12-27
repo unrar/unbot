@@ -8,7 +8,7 @@
 # Version: Shiva.2012.12.18b
 # Author: Catbuntu
 
-import socket, re
+import socket, re, os
 from udb_connector import UNDB_Connector
 #############
 #  CONFIGS  #
@@ -136,6 +136,8 @@ while True:
             privmsg (achan, perror)
       
       # Nas command, to manage associations
+
+		
       if (ex[3].lower() == ":&nas") or (ex[3].lower() == ":&nariz"):
          if len(ex) >= 5:
             # There's an argument
@@ -188,4 +190,60 @@ while True:
                   privmsg(achan, "Tu nick no está asociado a ninguna cuenta.")
                udb_nas.close()
                u.save("nas.udb")
+      if ex[3].lower() == ":&ip":
+         # CheckSyntax
+			if len(ex) <= 4:
+				privmsg(achan, chr(2) + mask[0] + chr(2) + ", ¡la sintaxis del comando es " + chr(3) + "12%ip xxx.xxx.xxx.xxx" + chr(15) + "!")
+			else:
+				os.system("wget -O ip.txt http://whatismyipaddress.com/ip/" + ex[4].rstrip())
+				lines = open("ip.txt", 'r')
+				g_country = "N/A"
+				g_host = "N/A"
+				g_isp = "N/A"
+				g_region = "N/A"
+				g_city = "N/A"
+				g_latitude = "N/A"
+				g_longitude = "N/A"
+				for linea in lines:
+					# Country
+					if linea.find("Country") != -1:
+						print "REACHED COUNTRY\n"
+						ter = linea.split("<")
+						pter = ter[4].split(">")
+						g_country = pter[1].replace(" ", "")
+					# ISP and rDNS
+					if linea.find("<!-- rDNS:") != -1:
+						print "REACHED RDNS\n"
+						ter = linea.split("rDNS: ")
+						pter = ter[1].split(" -->")
+						g_host = pter[0]
+						
+						kter = linea.split("ISP:<")
+						qkter = kter[1].split("<")
+						pkter = qkter[1].split(">")
+						g_isp = pkter[1]
+					# State and region
+					if linea.lower().find("state/region") != -1:
+						ter = linea.split("<")
+						pter = ter[4].split(">")
+						g_region = pter[1]
+					# City
+					if linea.lower().find("city:") != -1:
+						ter = linea.split("<")
+						pter = ter[4].split(">")
+						g_city = pter[1]
+					# Latitude
+					if linea.lower().find("latitude:<") != -1:
+						ter = linea.split("<")
+						pter = ter[4].split(">")
+						g_latitude = pter[1]
+					# Longitude
+					if linea.lower().find("longitude:<") != -1:
+						ter = linea.split("<")
+						pter = ter[4].split(">")
+						g_longitude = pter[1]
+					# End
+					if linea.lower().find("</html>") != -1:
+						privmsg(achan, "Información de la IP " + chr(2) + ex[4] + chr(2) + ": Host: " + g_host + " - Localización: " + g_city + ", " + g_region + ", " + g_country + " - Coordenadas: " + g_latitude + ", " + g_longitude + " - ISP: " + g_isp + " - Bloquear: " + chr(3) + "10https://es.wikipedia.org/wiki/Especial:Bloquear/" + ex[4].replace(".", "%2E") + chr(15) + " - Más información: " + chr(3) + "12http://www.whatismyipaddress.com/ip/" + ex[4].replace(".", "%2E") + chr(15) + ".")
+
    print data
