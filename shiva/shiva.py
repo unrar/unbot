@@ -8,7 +8,7 @@
 # Version: Shiva.2012.12.18b
 # Author: Catbuntu
 
-import socket, re, os
+import socket, re, os, urllib
 from udb_connector import UNDB_Connector
 #############
 #  CONFIGS  #
@@ -32,6 +32,12 @@ chans = ["#sandyd", "#undb", "#undb-es", "#wikipedia-es-bots"]
 owner = "wikimedia/unrar"
 # Mensaje de error de permisos
 perror = "¿Pero quién eres? ¡No estás autorizado a usar este comando!"
+# Prefijos y sus respectivas URLS base
+projects = {'wikt': 'https://es.wiktionary.org', 'b': 'https://es.wikibooks.org', 'n': 'https://es.wikinews.org', 'commons': 'https://commons.wikimedia.org', 'meta': 'https://meta.wikimedia.org', 'q': 'https://es.wikiquote.org', 's': 'https://es.wikisource.org', 'v': 'https://es.wikiversity.org', 'species': 'https://es.wikispecies.org', 'wikimedia': 'https://wikimediafoundation.org', 'incubator': 'https://incubator.wikimedia.org', 'mw': 'https://mediawiki.org'}
+# Códigos de lenguaje
+langs = ['es', 'en', 'ca']
+# Idioma por defecto
+deflang = 'es'
 
 ###################
 #    Funciones    #
@@ -61,7 +67,17 @@ def nick_exists_udb(nickn):
 def unscape(stri):
   return re.sub(r'\\(.)', r'\1', stri)
       
-
+# Función para convertir un enlace wiki a URL
+def c_url (wlink):
+   lpr = deflang
+   for lp in langs:
+      if re.search('^' + lp + ':', wlink):
+         lpr = lp
+   wlink = re.sub(r'^' + lpr + ':', '', wlink)
+   for prefix, url in projects.items():
+      if re.search(r'^' + prefix + ':', wlink):
+         return re.sub(r'^https?://es', 'https://' + lpr, url) + "/wiki/" + re.sub(r'%20', '_', urllib.quote(re.sub(r'^' + prefix + ':', '', wlink)))
+   return re.sub(r'^https?://es', 'https://' + lpr, "https://es.wikipedia.org") + "/wiki/" + re.sub(r'%20', '_', urllib.quote(wlink))
 
 # Creamos el socket "irc"
 irc = socket.socket ( socket.AF_INET, socket.SOCK_STREAM )
@@ -190,10 +206,16 @@ while True:
                   privmsg(achan, "Tu nick no está asociado a ninguna cuenta.")
                udb_nas.close()
                u.save("nas.udb")
+      # awiki: Devuelve el enlace
+      if ex[3].lower() == ':&awiki':
+         if len(ex) <= 4:
+            privmsg(achan, chr(2) + mask[0] + chr(2) + ", ¡la sintaxis del comando es " + chr(3) + "12&awiki [enlace wiki]" + chr(15) + "!")
+         else:
+            privmsg(achan, chr(3) + "12[1] " + c_url(' '.join(ex[4:])) + chr(15))
       if ex[3].lower() == ":&ip":
          # CheckSyntax
          if len(ex) <= 4:
-            privmsg(achan, chr(2) + mask[0] + chr(2) + ", ¡la sintaxis del comando es " + chr(3) + "12%ip xxx.xxx.xxx.xxx" + chr(15) + "!")
+            privmsg(achan, chr(2) + mask[0] + chr(2) + ", ¡la sintaxis del comando es " + chr(3) + "12&ip xxx.xxx.xxx.xxx" + chr(15) + "!")
          else:
             os.system("wget -O ip.txt http://whatismyipaddress.com/ip/" + ex[4].rstrip())
             lines = open("ip.txt", 'r')
