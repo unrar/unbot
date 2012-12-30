@@ -19,7 +19,7 @@ network = 'irc.freenode.net'
 # Puerto
 port = 6667
 # Nick
-nick = 'unshiva'
+nick = 'unshiva2'
 # Realname
 realname = 'Shiva 2012.12.18b'
 # Ident
@@ -66,6 +66,28 @@ def nick_exists_udb(nickn):
       un.save("nas.udb")
 def unscape(stri):
   return re.sub(r'\\(.)', r'\1', stri)
+  
+
+def unescape(text):
+    def fixup(m):
+        text = m.group(0)
+        if text[:2] == "&#":
+            # character reference
+            try:
+                if text[:3] == "&#x":
+                    return unichr(int(text[3:-1], 16))
+                else:
+                    return unichr(int(text[2:-1]))
+            except ValueError:
+                pass
+        else:
+            # named entity
+            try:
+                text = unichr(htmlentitydefs.name2codepoint[text[1:-1]])
+            except KeyError:
+                pass
+        return text # leave as is
+    return re.sub("&#?\w+;", fixup, text)
       
 # Función para convertir un enlace wiki a URL
 def c_url (wlink):
@@ -79,6 +101,17 @@ def c_url (wlink):
          return re.sub(r'^https?://es', 'https://' + lpr, url) + "/wiki/" + re.sub(r'%20', '_', urllib.quote(re.sub(r'^' + prefix + ':', '', wlink)))
    return re.sub(r'^https?://es', 'https://' + lpr, "https://es.wikipedia.org") + "/wiki/" + re.sub(r'%20', '_', urllib.quote(wlink))
 
+# Función para dar la URL de la API
+def cat_url (wlink):
+   lpr = deflang
+   for lp in langs:
+      if re.search('^' + lp + ':', wlink):
+         lpr = lp
+   wlink = re.sub(r'^' + lpr + ':', '', wlink)
+   for prefix, url in projects.items():
+      if re.search(r'^' + prefix + ':', wlink):
+         return re.sub(r'^https?://es', 'https://' + lpr, url) + "/w/api.php?action=query\&prop=categories\&titles=" + re.sub(r'%20', '_', urllib.quote(re.sub(r'^' + prefix + ':', '', wlink)))
+   return re.sub(r'^https?://es', 'https://' + lpr, "https://es.wikipedia.org") + "/w/api.php?action=query\&prop=categories\&titles=" + re.sub(r'%20', '_', urllib.quote(wlink))
 # Creamos el socket "irc"
 irc = socket.socket ( socket.AF_INET, socket.SOCK_STREAM )
 # Lo conectamos
@@ -151,9 +184,68 @@ while True:
          else:
             privmsg (achan, perror)
       
-      # Nas command, to manage associations
-
-      
+      if (ex[3].lower() == ":&cats") or (ex[3].lower() == ":&gatos"):
+         wget = os.system('wget -O resulta.txt ' + cat_url(' '.join(ex[4:])))
+         flines = open('resulta.txt')
+         lines = flines.readlines()
+         tmpcheck = lines[20].replace('&quot;', '')
+         tmpcheck = tmpcheck.replace("\t", "")
+         tmpcheck = tmpcheck.replace("title=\"", "")
+         tmpcheck = tmpcheck.replace("&lt;", "")
+         tmpcheck = tmpcheck.replace("/&gt;", "")
+         if tmpcheck.find("missing=") != -1:
+            privmsg(achan, "¡Error! El artículo " + chr(2) + ' '.join(ex[4:]) + chr(2) + " no existe.")
+         else:
+            cats = []
+            for linea in lines:
+               linea = linea.replace("&quot;", "")
+               linea = linea.replace("\t", "")
+               linea = re.sub(r",$", "", linea)
+               linea = linea.replace("\n", "")
+               linea = linea.replace("title=\"", "")
+               linea = linea.replace("&lt;", "")
+               linea = linea.replace("&gt;", "")
+               linea = linea.replace("\/&gt;", "")
+               linea = linea.replace("<span style=\"color:blue;\">cl ns=14 title=", "")
+               linea = linea.replace("</span>", "")
+               if (linea.find("Categoría") != -1) or (linea.find("Category") != -1):
+                  cat = linea.split(":")
+                  cat = cat[1:]
+                  cat = ':'.join(cat)
+                  cat = re.sub(r"/$", "", cat)
+                  cats.append(cat)
+            cats = ','.join(cats)
+            cats = re.sub(r" ,", ", ", cats)
+            cats = re.sub(r" $", ".", cats)
+            vmsg = "Categorías de " + chr(2) + ' '.join(ex[4:]) + chr(15) + ": " + cats
+            vmsg = vmsg.replace("Ã", "í")
+            if len(vmsg) >= 373:
+               resto = len(vmsg) - 370
+               wmsg = vmsg[-resto:] + "\n"
+               vmsg = vmsg[:370] + chr(2) + chr(3) + "12..." + chr(15) + "\n"
+               if len(wmsg) >= 373:
+                  restox = len(wmsg) - 370
+                  xmsg = wmsg[-restox:] + "\n"
+                  wmsg = wmsg[0:370] + chr(2) + chr(3) + "12..." + chr(15) + "\n"
+               else:
+                  wmsg = wmsg + "\n"
+            else:
+               vmsg = vmsg + "\n"
+            privmsg(achan, vmsg)
+            try:
+               wmsg
+            except NameError:
+               wmsg = None
+            if wmsg != None:
+               privmsg(achan, wmsg)
+            
+            try:
+               xmsg
+            except NameError:
+               xmsg = None
+            if xmsg != None:
+               privmsg(achan, xmsg)
+				
       if (ex[3].lower() == ":&nas") or (ex[3].lower() == ":&nariz"):
          if len(ex) >= 5:
             # There's an argument
