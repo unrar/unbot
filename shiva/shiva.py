@@ -38,7 +38,12 @@ projects = {'wikt': 'https://es.wiktionary.org', 'b': 'https://es.wikibooks.org'
 langs = ['es', 'en', 'ca']
 # Idioma por defecto
 deflang = 'es'
-
+# Nombres de los meses
+mname = {'01': 'enero', '02': 'febrero', '03': 'marzo', '04': 'abril', '05': 'mayo', '06': 'junio', '07': 'julio', '08': 'agosto', '09': 'septiembre', '10': 'octubre', '11': 'noviembre', '12': 'diciembre'}
+# Descripcion de los comandos
+descs = {'join': 'Entra a un canal. Solo para administradores.', 'part': 'Sale de un canal. Solo para administradores.', 'ping': 'Te responde con pong.', 'nas': 'Sin parámetros, te muestra los nicks asignados a tu cuenta. Si especificas una cuenta como parámetro, añade tu nick a ella (si no está asignado ya a otra).', 'ip': 'Muestra información sobre una IP.', 'gatos': 'Muestra las categorías de un artículo.', 'cats': 'Muestra las categorías de un artículo.', 'awiki': 'Muestra la URL de un enlace wiki.', 'info': 'Con parámetros, muestra información del nick dado. Sin parámetros, muestra la de tu nick. Si el nick tiene una cuenta asociada, muestra su información.', 'quit': 'Sale del IRC. Sólo para administradores.'}
+# Uso de los comandos
+usos = {'join': '&join <#canal>', 'part': '&part <#canal>', 'ping': '&ping', 'nas': '&nas [cuenta]', 'awiki': '&awiki [idioma:][proyecto:]<artículo>', 'cats': '&cats [idioma:][proyecto:]<artículo>', 'gatos': '&gatos [idioma:][proyecto:]<artículo>', 'info': '&info [[idioma:][proyecto:]<nick>]', 'ip': '&ip xxx.xxx.xxx.xxx', 'quit': '&quit'}
 ###################
 #    Funciones    #
 ###################
@@ -112,6 +117,25 @@ def cat_url (wlink):
       if re.search(r'^' + prefix + ':', wlink):
          return re.sub(r'^https?://es', 'https://' + lpr, url) + "/w/api.php?action=query\&prop=categories\&titles=" + re.sub(r'%20', '_', urllib.quote(re.sub(r'^' + prefix + ':', '', wlink)))
    return re.sub(r'^https?://es', 'https://' + lpr, "https://es.wikipedia.org") + "/w/api.php?action=query\&prop=categories\&titles=" + re.sub(r'%20', '_', urllib.quote(wlink))
+
+# Función para dar la URL de la API &info
+def info_url (wlink):
+   lpr = deflang
+   for lp in langs:
+      if re.search('^' + lp + ':', wlink):
+         lpr = lp
+   wlink = re.sub(r'^' + lpr + ':', '', wlink)
+   for prefix, url in projects.items():
+      if re.search(r'^' + prefix + ':', wlink):
+         return re.sub(r'^https?://es', 'https://' + lpr, url) + "/w/api.php?action=query\&list=users\&ususers=" + re.sub(r'%20', '_', urllib.quote(re.sub(r'^' + prefix + ':', '', wlink))) + "\&usprop=blockinfo\|groups\|editcount\|registration\|emailable\|gender\&format=jsonfm"
+   return re.sub(r'^https?://es', 'https://' + lpr, "https://es.wikipedia.org") + "/w/api.php?action=query\&list=users\&ususers=" + re.sub(r'%20', '_', urllib.quote(wlink)) + "\&usprop=blockinfo\|groups\|editcount\|registration\|emailable\|gender\&format=jsonfm"
+
+# Función para pasar de número a nombre de mes
+def month_letter(month):
+   for number, letter in mname.items():
+      if number == month:
+         return letter
+         
 # Creamos el socket "irc"
 irc = socket.socket ( socket.AF_INET, socket.SOCK_STREAM )
 # Lo conectamos
@@ -158,9 +182,22 @@ while True:
          primera = ':'.join(tempsp)
          
       # @Debug: Test command
-      if ex[3].lower() == ":&test":
-         privmsg (achan, "Prueba recibida, gracias.")
-         
+      if ex[3].lower() == ":&ping":
+         privmsg (achan, mask[0] + ", ¡PONG!")
+      # Ayuda
+      if (ex[3].lower() == ":&ayuda") or (ex[3].lower() == ":&help"):
+         if len(ex) <= 4:
+            privmsg(achan, "¡Hola! Soy el robot " + chr(3) + "05" + nick + chr(15) + ". Mis comandos (prefijados con \"&\") son: " + chr(3) + "12info, gatos (cats), awiki, join, part, quit, ping, ip, nas.");
+            privmsg(achan, "Para más información, pon: " + chr(3) + "12&ayuda " + chr(2) + "elcomando" + chr(15) + ".")
+         else:
+            found = False
+            for command, description in descs.items():
+               if command == ex[4]:
+                  privmsg(achan, "Descripción del comando: " + description)
+                  privmsg(achan, "Uso del comando: " + chr(3) + "12" + usos[ex[4]])
+                  found = True
+            if found == False:
+               privmsg(achan, "Lo siento, el comando " + chr(3) + "04" + ex[4] + chr(15) + " no consta en mi base de datos.")
       # Quit command for shiva
       if (' '.join(ex[3:5]).lower() == ':%shiva quit') or (ex[3] == ":&quit"):
          if cloak.find(owner) != -1:
@@ -185,68 +222,228 @@ while True:
             privmsg (achan, perror)
       
       if (ex[3].lower() == ":&cats") or (ex[3].lower() == ":&gatos"):
-         wget = os.system('wget -O resulta.txt ' + cat_url(' '.join(ex[4:])))
+         if len(ex) <= 4:
+            privmsg(achan, chr(2) + mask[0] + chr(2) + ", ¡la sintaxis del comando es " + chr(3) + "12&cats [idioma:][proyecto:]artículo" + chr(3) + "!")
+         else:
+            wget = os.system('wget -O resulta.txt ' + cat_url(' '.join(ex[4:])))
+            flines = open('resulta.txt')
+            lines = flines.readlines()
+            tmpcheck = lines[20].replace('&quot;', '')
+            tmpcheck = tmpcheck.replace("\t", "")
+            tmpcheck = tmpcheck.replace("title=\"", "")
+            tmpcheck = tmpcheck.replace("&lt;", "")
+            tmpcheck = tmpcheck.replace("/&gt;", "")
+            if tmpcheck.find("missing=") != -1:
+               privmsg(achan, "¡Error! El artículo " + chr(2) + ' '.join(ex[4:]) + chr(2) + " no existe.")
+            else:
+               cats = []
+               for linea in lines:
+                  linea = linea.replace("&quot;", "")
+                  linea = linea.replace("\t", "")
+                  linea = re.sub(r",$", "", linea)
+                  linea = linea.replace("\n", "")
+                  linea = linea.replace("title=\"", "")
+                  linea = linea.replace("&lt;", "")
+                  linea = linea.replace("&gt;", "")
+                  linea = linea.replace("\/&gt;", "")
+                  linea = linea.replace("<span style=\"color:blue;\">cl ns=14 title=", "")
+                  linea = linea.replace("</span>", "")
+                  if (linea.find("Categoría") != -1) or (linea.find("Category") != -1):
+                     cat = linea.split(":")
+                     cat = cat[1:]
+                     cat = ':'.join(cat)
+                     cat = re.sub(r"/$", "", cat)
+                     cats.append(cat)
+               cats = ','.join(cats)
+               cats = re.sub(r" ,", ", ", cats)
+               cats = re.sub(r" $", ".", cats)
+               vmsg = "Categorías de " + chr(2) + ' '.join(ex[4:]) + chr(15) + ": " + cats
+               vmsg = vmsg.replace("Ã", "í")
+               if len(vmsg) >= 373:
+                  resto = len(vmsg) - 370
+                  wmsg = vmsg[-resto:] + "\n"
+                  vmsg = vmsg[:370] + chr(2) + chr(3) + "12..." + chr(15) + "\n"
+                  if len(wmsg) >= 373:
+                     restox = len(wmsg) - 370
+                     xmsg = wmsg[-restox:] + "\n"
+                     wmsg = wmsg[0:370] + chr(2) + chr(3) + "12..." + chr(15) + "\n"
+                  else:
+                     wmsg = wmsg + "\n"
+               else:
+                  vmsg = vmsg + "\n"
+               privmsg(achan, vmsg)
+               try:
+                  wmsg
+               except NameError:
+                  wmsg = None
+               if wmsg != None:
+                  privmsg(achan, wmsg)
+                  del wmsg
+               try:
+                  xmsg
+               except NameError:
+                  xmsg = None
+               if xmsg != None:
+                  privmsg(achan, xmsg)
+                  del xmsg
+               privmsg(achan, chr(3) + "12[1] " + c_url(' '.join(ex[4:])) + chr(15))
+      if ex[3].lower() == ":&info":
+         try:
+            ex[4]
+         except IndexError:
+            ex.append(None)
+         if ex[4] != None:
+            partes = ex[4:]
+            nnick = []
+            for parte in partes:
+               nnick.append(re.escape(parte))
+            np = '_'.join(nnick)
+         else:
+            np = mask[0]
+            
+         # np = nick (escapado) a buscar
+         # comprobamos si está en la undb
+         np_e = nick_exists_udb(np)
+         if np_e != False:
+            np = np_e
+         
+         # Ahora, si existe, np será el nick
+         # Descargamos la api usando la función
+         wget = os.system('wget -O resulta.txt ' + info_url(np))
+         
+         # Abrimos el fichero
+         
          flines = open('resulta.txt')
          lines = flines.readlines()
-         tmpcheck = lines[20].replace('&quot;', '')
+         tmpcheck = lines[21].replace("&quot;", "")
          tmpcheck = tmpcheck.replace("\t", "")
-         tmpcheck = tmpcheck.replace("title=\"", "")
-         tmpcheck = tmpcheck.replace("&lt;", "")
-         tmpcheck = tmpcheck.replace("/&gt;", "")
-         if tmpcheck.find("missing=") != -1:
-            privmsg(achan, "¡Error! El artículo " + chr(2) + ' '.join(ex[4:]) + chr(2) + " no existe.")
+         tmpcheck = tmpcheck.split(" ")
+         if tmpcheck[0] == "missing:":
+            privmsg(achan, "¡Error! El usuario " + chr(2) + np + chr(2) + " no existe.")
          else:
-            cats = []
             for linea in lines:
                linea = linea.replace("&quot;", "")
                linea = linea.replace("\t", "")
                linea = re.sub(r",$", "", linea)
                linea = linea.replace("\n", "")
-               linea = linea.replace("title=\"", "")
-               linea = linea.replace("&lt;", "")
-               linea = linea.replace("&gt;", "")
-               linea = linea.replace("\/&gt;", "")
-               linea = linea.replace("<span style=\"color:blue;\">cl ns=14 title=", "")
-               linea = linea.replace("</span>", "")
-               if (linea.find("Categoría") != -1) or (linea.find("Category") != -1):
-                  cat = linea.split(":")
-                  cat = cat[1:]
-                  cat = ':'.join(cat)
-                  cat = re.sub(r"/$", "", cat)
-                  cats.append(cat)
-            cats = ','.join(cats)
-            cats = re.sub(r" ,", ", ", cats)
-            cats = re.sub(r" $", ".", cats)
-            vmsg = "Categorías de " + chr(2) + ' '.join(ex[4:]) + chr(15) + ": " + cats
-            vmsg = vmsg.replace("Ã", "í")
-            if len(vmsg) >= 373:
-               resto = len(vmsg) - 370
-               wmsg = vmsg[-resto:] + "\n"
-               vmsg = vmsg[:370] + chr(2) + chr(3) + "12..." + chr(15) + "\n"
-               if len(wmsg) >= 373:
-                  restox = len(wmsg) - 370
-                  xmsg = wmsg[-restox:] + "\n"
-                  wmsg = wmsg[0:370] + chr(2) + chr(3) + "12..." + chr(15) + "\n"
-               else:
-                  wmsg = wmsg + "\n"
-            else:
-               vmsg = vmsg + "\n"
-            privmsg(achan, vmsg)
-            try:
-               wmsg
-            except NameError:
-               wmsg = None
-            if wmsg != None:
-               privmsg(achan, wmsg)
-               del wmsg
-            try:
-               xmsg
-            except NameError:
-               xmsg = None
-            if xmsg != None:
-               privmsg(achan, xmsg)
-               del xmsg
-				
+               linea = linea.split(" ")
+               seccion = linea[0]
+               seccion = re.sub(r",$", "", seccion)
+               try:
+                  linea[1]
+               except IndexError:
+                  linea.append(None)
+               if linea[1] != None:
+                  valor = linea[1]
+               
+               # Switch
+               if seccion == "userid:":
+                  userid = valor
+               elif seccion == "name:":
+                  valor = linea[1:]
+                  valor = ' '.join(valor)
+                  nombre = valor
+               elif seccion == "editcount:":
+                  ediciones = valor
+               elif seccion == "registration:":
+                  if valor == "null":
+                     registro = chr(3) + "04N/D" + chr(15)
+                  else:
+                     tmp = valor.split('T')
+                     fechat = tmp[0]
+                     fechaw = fechat.split('-')
+                     tmp2 = tmp[1].split("Z")
+                     horat = tmp2[0]
+                     registro = "El " + fechaw[2] + " de " + month_letter(fechaw[1]) + " del " + fechaw[0] + ", a las " + horat + "."
+               elif seccion == "gender:":
+                  if valor == "male":
+                     igener = "M"
+                     genero = chr(3) + "12M-♂" + chr(15)
+                  elif valor == "female":
+                     igener = "F"
+                     genero = chr(3) + "13F-♀" + chr(15)
+                  else:
+                     igener = "M"
+                     genero = chr(3) + "04N/D" + chr(15)
+               elif seccion == "user":
+                  fw = open("grupos.txt", 'ab')
+                  fw.write("usuario,")
+                  fw.close()
+               elif seccion == "autoconfirmed":
+                  fw = open("grupos.txt", 'ab')
+                  fw.write(" autoconfirmado,")
+                  fw.close()
+               elif seccion == "bureaucrat":
+                  fw = open("grupos.txt", 'ab')
+                  fw.write(chr(2) + " burócrata" + chr(2) + ",")
+                  fw.close()
+               elif seccion == "sysop":
+                  fw = open("grupos.txt", 'ab')
+                  fw.write(chr(2) + " bibliotecario" + chr(2) + ",")
+                  fw.close()
+               elif seccion == "autopatrolled":
+                  fw = open("grupos.txt", 'ab')
+                  fw.write(chr(2) + " autoverificado" + chr(2) + ",")
+                  fw.close()
+               elif seccion == "bot":
+                  fw = open("grupos.txt", 'ab')
+                  fw.write(chr(2) + " bot" + chr(2) + ",")
+                  fw.close()
+               elif seccion == "checkuser":
+                  fw = open("grupos.txt", 'ab')
+                  fw.write(chr(2) + " checkuser" + chr(2) + ",")
+                  fw.close()
+               elif seccion == "oversight":
+                  fw = open("grupos.txt", 'ab')
+                  fw.write(chr(2) + " supresor" + chr(2) + ",")
+                  fw.close()
+               elif seccion == "patroller":
+                  fw = open("grupos.txt", 'ab')
+                  fw.write(chr(2) + " verificador" + chr(2) + ",")
+                  fw.close()
+               elif seccion == "rollbacker":
+                  fw = open("grupos.txt", 'ab')
+                  fw.write(chr(2) + " reversor" + chr(2) + ",")
+                  fw.close()
+               elif seccion == "steward":
+                  fw = open("grupos.txt", 'ab')
+                  fw.write(chr(2) + chr(3) + "12 steward" + chr(15) + ",")
+                  fw.close()
+               elif seccion == "</pre>":
+                  fw = open("grupos.txt", "rb")
+                  gup = fw.read()
+                  gup = re.sub(r",$", ".", gup)
+                  fw.close()
+                  os.system("rm grupos.txt")
+                  if igener == "M":
+                     privmsg(achan, "Usuario es " + chr(2) + nombre + chr(2) + " (id: " + chr(2) + userid + chr(2) + "). Ediciones: " + chr(2) + ediciones + chr(2) + ". Registrado: " + registro + " Género: " + genero + ". Grupos: " + gup);
+                  elif igener == "F":
+                     privmsg(achan, "Usuaria es " + chr(2) + nombre + chr(2) + " (id: " + chr(2) + userid + chr(2) + "). Ediciones: " + chr(2) + ediciones + chr(2) + ". Registrada: " + registro + " Género: " + genero + ". Grupos: " + gup);
+                  
+                  # Nicks asociados
+                  p_nombre = re.escape(nombre)
+                  u_nicks = []
+                  un = UNDB_Connector()
+                  un.connect("nas.udb")
+                  unl = open("cache.ucb")
+                  for uline in unl:
+                     expl = uline.rstrip().split("~!")
+                     if expl[0] == p_nombre:
+                        print "Found: " + expl[0] + "\n"
+                        expl.pop(0)
+                        for expln in expl:
+                           print "Found nick: " + expln + "\n"
+                           u_nicks.append(expln)
+                  try:
+                     u_nicks
+                  except NameError:
+                     u_nicks = None
+                  if u_nicks != None:
+                     smoc = ', '.join(u_nicks)
+                  else:
+                     smoc = "N/A"
+                  smoc = re.sub(r'\\(.)', r'\1', smoc)
+                  privmsg(achan, "Nicks asociados: " + chr(2) + smoc + chr(2) + ".")
       if (ex[3].lower() == ":&nas") or (ex[3].lower() == ":&nariz"):
          if len(ex) >= 5:
             # There's an argument
