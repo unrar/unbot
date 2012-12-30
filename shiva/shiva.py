@@ -19,7 +19,7 @@ network = 'irc.freenode.net'
 # Puerto
 port = 6667
 # Nick
-nick = 'unshiva2'
+nick = 'unshiva'
 # Realname
 realname = 'Shiva 2012.12.18b'
 # Ident
@@ -238,13 +238,14 @@ while True:
                wmsg = None
             if wmsg != None:
                privmsg(achan, wmsg)
-            
+               del wmsg
             try:
                xmsg
             except NameError:
                xmsg = None
             if xmsg != None:
                privmsg(achan, xmsg)
+               del xmsg
 				
       if (ex[3].lower() == ":&nas") or (ex[3].lower() == ":&nariz"):
          if len(ex) >= 5:
