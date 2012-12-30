@@ -243,5 +243,5 @@ while True:
                   g_longitude = pter[1]
                # End
                if linea.lower().find("</html>") != -1:
-                  privmsg(achan, "Información de la IP " + chr(2) + ex[4] + chr(2) + ": Host: " + g_host + " - Localización: " + g_city + ", " + g_region + ", " + g_country + " - Coordenadas: " + g_latitude + ", " + g_longitude + " - ISP: " + g_isp + " - Bloquear: " + chr(3) + "10https://es.wikipedia.org/wiki/Especial:Bloquear/" + ex[4].replace(".", "%2E") + chr(15) + " - Más información: " + chr(3) + "12http://www.whatismyipaddress.com/ip/" + ex[4].replace(".", "%2E") + chr(15) + ".")
+                  privmsg(achan, "Información de la IP " + chr(2) + ex[4] + chr(2) + ": Host: " + g_host.rstrip() + " - Localización: " + g_city.rstrip() + ", " + g_region.rstrip() + ", " + g_country.rstrip() + " - Coordenadas: " + g_latitude.rstrip() + ", " + g_longitude.rstrip() + " - ISP: " + g_isp.rstrip() + " - Bloquear: " + chr(3) + "10https://es.wikipedia.org/wiki/Especial:Bloquear/" + ex[4].replace(".", "%2E").rstrip() + chr(15) + " - Más información: " + chr(3) + "12http://www.whatismyipaddress.com/ip/" + ex[4].replace(".", "%2E").rstrip() + chr(15) + ".")
    print data
