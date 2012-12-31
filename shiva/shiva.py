@@ -419,9 +419,9 @@ while True:
                   fw.close()
                   os.system("rm grupos.txt")
                   if igener == "M":
-                     privmsg(achan, "Usuario es " + chr(2) + nombre + chr(2) + " (id: " + chr(2) + userid + chr(2) + "). Ediciones: " + chr(2) + ediciones + chr(2) + ". Registrado: " + registro + " Género: " + genero + ". Grupos: " + gup);
+                     privmsg(achan, "Usuario es " + chr(2) + nombre + chr(2) + " (id: " + chr(2) + userid + chr(2) + "). Ediciones: " + chr(2) + ediciones + chr(2) + ". Registrado: " + registro + " Género: " + genero + ". Grupos:" + gup);
                   elif igener == "F":
-                     privmsg(achan, "Usuaria es " + chr(2) + nombre + chr(2) + " (id: " + chr(2) + userid + chr(2) + "). Ediciones: " + chr(2) + ediciones + chr(2) + ". Registrada: " + registro + " Género: " + genero + ". Grupos: " + gup);
+                     privmsg(achan, "Usuaria es " + chr(2) + nombre + chr(2) + " (id: " + chr(2) + userid + chr(2) + "). Ediciones: " + chr(2) + ediciones + chr(2) + ". Registrada: " + registro + " Género: " + genero + ". Grupos:" + gup);
                   
                   # Nicks asociados
                   p_nombre = re.escape(nombre)
