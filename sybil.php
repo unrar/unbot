@@ -11,7 +11,7 @@ $port = 6667; //Puerto 6667
 $nick = "unbot";
 $ident = "unbotillo";
 $realname = "Sybil 2012.12.17b + UNDB Sybil 2012.12.16";
-$passwd = "croqueta98";
+$passwd = "openaccess";
 //Dueño (máscara)
 $owner = "wikimedia\/unrar";
 //Canal al que entraremos
