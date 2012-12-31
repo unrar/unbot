@@ -370,7 +370,7 @@ while True:
                      genero = chr(3) + "04N/D" + chr(15)
                elif seccion == "user":
                   fw = open("grupos.txt", 'ab')
-                  fw.write("usuario,")
+                  fw.write(" usuario,")
                   fw.close()
                elif seccion == "autoconfirmed":
                   fw = open("grupos.txt", 'ab')
@@ -438,8 +438,8 @@ while True:
                            print "Found nick: " + expln + "\n"
                            u_nicks.append(expln)
                   try:
-                     u_nicks
-                  except NameError:
+                     u_nicks[0]
+                  except IndexError:
                      u_nicks = None
                   if u_nicks != None:
                      smoc = ', '.join(u_nicks)
