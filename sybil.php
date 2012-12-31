@@ -11,14 +11,14 @@ $port = 6667; //Puerto 6667
 $nick = "unbot";
 $ident = "unbotillo";
 $realname = "Sybil 2012.12.17b + UNDB Sybil 2012.12.16";
-$passwd = "openaccess";
+$passwd = "croqueta98";
 //Dueño (máscara)
 $owner = "wikimedia\/unrar";
 //Canal al que entraremos
 $chan = "#wikipedia-es-bots";
 // Canales
-$chans = array("#undb");
-#$chans = array("#wikipedia-es", "#sandyd", "#undb", "#undb-es");
+//$chans = array("#undb");
+$chans = array("#wikipedia-es", "#sandyd", "#undb", "#undb-es");
 // Prevenimos el timelimit de PHP
 echo "Conectando a ".$host."...\n";
 // Abrimos el socket
