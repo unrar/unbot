@@ -297,17 +297,16 @@ while True:
             ex.append(None)
          if ex[4] != None:
             if (ex[4] in projects) or (ex[4] in langs):
-               privmsg (achan, "Lo siento, pero esta función aún no está soportada.")
-               goto .finito
-            else:
-               partes = ex[4:]
-               nnick = []
-               enick = []
-               for parte in partes:
-                  nnick.append(parte)
-                  enick.append(re.escape(parte))
-               np = '_'.join(nnick)
-               ne = '_'.join(enick)
+               privmsg (achan, "Lo siento, pero esta función aún no está soportada. Se mostrará la información local de tu nick.")
+               ex[4] = mask[0]
+            partes = ex[4:]
+            nnick = []
+            enick = []
+            for parte in partes:
+               nnick.append(parte)
+               enick.append(re.escape(parte))
+            np = '_'.join(nnick)
+            ne = '_'.join(enick)
          else:
             np = mask[0]
             ne = re.escape(mask[0])
