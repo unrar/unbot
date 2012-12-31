@@ -5,7 +5,7 @@
 # UnBot IRC Bot #
 #################
 
-# Version: Shiva.2012.12.18b
+# Version: Shiva 13.04 Beta
 # Author: Catbuntu
 
 import socket, re, os, urllib
@@ -19,15 +19,17 @@ network = 'irc.freenode.net'
 # Puerto
 port = 6667
 # Nick
-nick = 'unshiva'
+nick = 'unbot'
 # Realname
-realname = 'Shiva 2012.12.18b'
+realname = 'Shiva 13.04 Beta'
 # Ident
 ident = 'shiva'
+# Contraseña de nickserv
+npass = 'openaccess'
 # Canal principal
-chan = '##bots-debug'
+chan = '#wikipedia-es'
 # Canales a entrar
-chans = ["#sandyd", "#undb", "#undb-es", "#wikipedia-es-bots"]
+chans = ["#sandyd", "#undb", "#undb-es", "#wikipedia-es-bots", "##bots-debug"]
 # Dueño
 owner = "wikimedia/unrar"
 # Mensaje de error de permisos
@@ -143,6 +145,7 @@ irc.connect ( ( network, port ) )
 print irc.recv ( 4096 )
 irc.send ( 'NICK ' + nick + '\r\n' )
 irc.send ( 'USER ' + ident + ' bla bla :' + realname + '\r\n' )
+irc.send ( 'PRIVMSG NickServ :IDENTIFY ' + npass + '\r\n')
 irc.send ( 'JOIN ' + chan + '\r\n' )
 # Canales secundarios
 for tcanal in chans:
