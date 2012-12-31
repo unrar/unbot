@@ -9,6 +9,7 @@
 # Author: Catbuntu
 
 import socket, re, os, urllib
+from goto import goto, comefrom, label
 from udb_connector import UNDB_Connector
 #############
 #  CONFIGS  #
@@ -295,14 +296,18 @@ while True:
          except IndexError:
             ex.append(None)
          if ex[4] != None:
-            partes = ex[4:]
-            nnick = []
-            enick = []
-            for parte in partes:
-               nnick.append(parte)
-               enick.append(re.escape(parte))
-            np = '_'.join(nnick)
-            ne = '_'.join(enick)
+            if (ex[4] in projects) or (ex[4] in langs):
+               privmsg (achan, "Lo siento, pero esta función aún no está soportada.")
+               goto .finito
+            else:
+               partes = ex[4:]
+               nnick = []
+               enick = []
+               for parte in partes:
+                  nnick.append(parte)
+                  enick.append(re.escape(parte))
+               np = '_'.join(nnick)
+               ne = '_'.join(enick)
          else:
             np = mask[0]
             ne = re.escape(mask[0])
@@ -451,6 +456,7 @@ while True:
                      smoc = "N/A"
                   smoc = re.sub(r'\\(.)', r'\1', smoc)
                   privmsg(achan, "Nicks asociados: " + chr(2) + smoc + chr(2) + ".")
+                  label .finito
       if (ex[3].lower() == ":&nas") or (ex[3].lower() == ":&nariz"):
          if len(ex) >= 5:
             # There's an argument
