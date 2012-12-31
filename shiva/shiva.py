@@ -420,40 +420,43 @@ while True:
                   fw.write(chr(2) + chr(3) + "12 steward" + chr(15) + ",")
                   fw.close()
                elif seccion == "</pre>":
-                  fw = open("grupos.txt", "rb")
-                  gup = fw.read()
-                  gup = re.sub(r",$", ".", gup)
-                  fw.close()
-                  os.system("rm grupos.txt")
-                  if igener == "M":
-                     privmsg(achan, "Usuario es " + chr(2) + nombre + chr(2) + " (id: " + chr(2) + userid + chr(2) + "). Ediciones: " + chr(2) + ediciones + chr(2) + ". Registrado: " + registro + " Género: " + genero + ". Grupos:" + gup);
-                  elif igener == "F":
-                     privmsg(achan, "Usuaria es " + chr(2) + nombre + chr(2) + " (id: " + chr(2) + userid + chr(2) + "). Ediciones: " + chr(2) + ediciones + chr(2) + ". Registrada: " + registro + " Género: " + genero + ". Grupos:" + gup);
-                  
-                  # Nicks asociados
-                  p_nombre = re.escape(nombre)
-                  u_nicks = []
-                  un = UNDB_Connector()
-                  un.connect("nas.udb")
-                  unl = open("cache.ucb")
-                  for uline in unl:
-                     expl = uline.rstrip().split("~!")
-                     if expl[0] == p_nombre:
-                        print "Found: " + expl[0] + "\n"
-                        expl.pop(0)
-                        for expln in expl:
-                           print "Found nick: " + expln + "\n"
-                           u_nicks.append(expln)
                   try:
-                     u_nicks[0]
-                  except IndexError:
-                     u_nicks = None
-                  if u_nicks != None:
-                     smoc = ', '.join(u_nicks)
-                  else:
-                     smoc = "N/A"
-                  smoc = re.sub(r'\\(.)', r'\1', smoc)
-                  privmsg(achan, "Nicks asociados: " + chr(2) + smoc + chr(2) + ".")
+                     fw = open("grupos.txt", "rb")
+                     gup = fw.read()
+                     gup = re.sub(r",$", ".", gup)
+                     fw.close()
+                     os.system("rm grupos.txt")
+                     if igener == "M":
+                        privmsg(achan, "Usuario es " + chr(2) + nombre + chr(2) + " (id: " + chr(2) + userid + chr(2) + "). Ediciones: " + chr(2) + ediciones + chr(2) + ". Registrado: " + registro + " Género: " + genero + ". Grupos:" + gup);
+                     elif igener == "F":
+                        privmsg(achan, "Usuaria es " + chr(2) + nombre + chr(2) + " (id: " + chr(2) + userid + chr(2) + "). Ediciones: " + chr(2) + ediciones + chr(2) + ". Registrada: " + registro + " Género: " + genero + ". Grupos:" + gup);
+                  
+                     # Nicks asociados
+                     p_nombre = re.escape(nombre)
+                     u_nicks = []
+                     un = UNDB_Connector()
+                     un.connect("nas.udb")
+                     unl = open("cache.ucb")
+                     for uline in unl:
+                        expl = uline.rstrip().split("~!")
+                        if expl[0] == p_nombre:
+                           print "Found: " + expl[0] + "\n"
+                           expl.pop(0)
+                           for expln in expl:
+                              print "Found nick: " + expln + "\n"
+                              u_nicks.append(expln)
+                     try:
+                        u_nicks[0]
+                     except IndexError:
+                        u_nicks = None
+                     if u_nicks != None:
+                        smoc = ', '.join(u_nicks)
+                     else:
+                        smoc = "N/A"
+                     smoc = re.sub(r'\\(.)', r'\1', smoc)
+                     privmsg(achan, "Nicks asociados: " + chr(2) + smoc + chr(2) + ".")
+                  except:
+                     privmsg(achan, "Hubo un error al procesar tu solicitud. Porfavor, comprueba &ayuda info.")
       if (ex[3].lower() == ":&nas") or (ex[3].lower() == ":&nariz"):
          if len(ex) >= 5:
             # There's an argument
