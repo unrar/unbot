@@ -295,7 +295,7 @@ while True:
          except IndexError:
             ex.append(None)
          if ex[4] != None:
-            if (ex[4] in projects) or (ex[4] in langs):
+            if (ex[4] + ":" in projects) or (ex[4] + ":" in langs):
                privmsg (achan, "Lo siento, pero esta función aún no está soportada. Se mostrará la información local de tu nick.")
                ex[4] = mask[0]
             partes = ex[4:]
