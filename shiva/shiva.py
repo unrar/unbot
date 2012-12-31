@@ -9,7 +9,6 @@
 # Author: Catbuntu
 
 import socket, re, os, urllib
-from goto import goto, comefrom, label
 from udb_connector import UNDB_Connector
 #############
 #  CONFIGS  #
@@ -455,7 +454,6 @@ while True:
                      smoc = "N/A"
                   smoc = re.sub(r'\\(.)', r'\1', smoc)
                   privmsg(achan, "Nicks asociados: " + chr(2) + smoc + chr(2) + ".")
-                  label .finito
       if (ex[3].lower() == ":&nas") or (ex[3].lower() == ":&nariz"):
          if len(ex) >= 5:
             # There's an argument
