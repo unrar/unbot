@@ -150,7 +150,6 @@ irc.send ( 'JOIN ' + chan + '\r\n' )
 # Canales secundarios
 for tcanal in chans:
    irc.send("JOIN " + tcanal + "\r\n")
-irc.send ( 'PRIVMSG ' + chan + ' :Hola mundo.\r\n' )
 
 while True:
    data = irc.recv ( 4096 )
@@ -298,17 +297,22 @@ while True:
          if ex[4] != None:
             partes = ex[4:]
             nnick = []
+            enick = []
             for parte in partes:
-               nnick.append(re.escape(parte))
+               nnick.append(parte)
+               enick.append(re.escape(parte))
             np = '_'.join(nnick)
+            ne = '_'.join(enick)
          else:
             np = mask[0]
+            ne = re.escape(mask[0])
             
-         # np = nick (escapado) a buscar
+         # np = nick (no escapado) a buscar
+         # ne = nick escapado
          # comprobamos si está en la undb
-         np_e = nick_exists_udb(np)
+         np_e = nick_exists_udb(ne)
          if np_e != False:
-            np = np_e
+            np = unscape(np_e)
          
          # Ahora, si existe, np será el nick
          # Descargamos la api usando la función
