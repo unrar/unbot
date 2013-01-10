@@ -19,7 +19,7 @@ network = 'irc.freenode.net'
 # Puerto
 port = 6667
 # Nick
-nick = 'unbot'
+nick = 'unbotS'
 # Realname
 realname = 'Shiva 13.04 Beta'
 # Ident
@@ -279,7 +279,7 @@ while True:
                smask = vseen[0]
                stime = vseen[1]
                schan = vseen[2]
-               privmsg(achan, "El usuario " + chr(2) + ex[4] + chr(2) + " fue visto por última vez el " + chr(3) + "12" + stime + chr(15) + " en el canal " + chr(3) + "12" + schan + chr(15) + ", bajo la máscara " + chr(3) + "12" + smask + chr(15) + ".")
+               privmsg(achan, "El usuario " + chr(2) + ex[4] + chr(2) + " fue visto por última vez el " + chr(3) + "12" + stime + " (GMT)" + chr(15) + " en el canal " + chr(3) + "12" + schan.rstrip() + chr(15) + ", bajo la máscara " + chr(3) + "12" + smask + chr(15) + ".")
          
       if (ex[3].lower() == ":&cats") or (ex[3].lower() == ":&gatos"):
          if len(ex) <= 4:
