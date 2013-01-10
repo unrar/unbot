@@ -29,7 +29,7 @@ npass = 'openaccess'
 # Canal principal
 chan = '#wikipedia-es'
 # Canales a entrar
-chans = ["#sandyd", "#undb", "#undb-es", "#wikipedia-es-bots", "##bots-debug"]
+chans = ["#sandyd", "#undb", "#undb-es", "#wikipedia-es-bots", "##bots-debug", "##wikicafe"]
 # Dueño
 owner = "wikimedia/unrar"
 # Mensaje de error de permisos
@@ -63,7 +63,7 @@ def nick_exists_udb(nickn):
       for line in udb_nas:
          nas_expl = line.split("~!")
          for nas_vnick in nas_expl:
-            if (nas_vnick.rstrip() == nickn):
+            if (nas_vnick.rstrip().lower() == nickn.lower()):
                nas_found = True
                nas_aname = nas_expl[0]
       if nas_found != True:
@@ -498,7 +498,7 @@ while True:
                   nas_expl = line.split("~!")
                   for nas_vnick in nas_expl:
                      nas_vnick = unscape(nas_vnick)
-                     if (nas_vnick.rstrip() == mask[0]): nas_found = True
+                     if (nas_vnick.rstrip().lower() == mask[0].lower()): nas_found = True
                      nas_nicks.append(nas_vnick.rstrip())
                   if nas_found == True:
                      udb_dbo = nas_nicks.pop(0)
