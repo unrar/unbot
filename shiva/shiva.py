@@ -8,7 +8,7 @@
 # Version: Shiva 13.04 Beta
 # Author: Catbuntu
 
-import socket, re, os, urllib
+import socket, re, os, urllib, time
 from udb_connector import UNDB_Connector
 #############
 #  CONFIGS  #
@@ -137,6 +137,27 @@ def month_letter(month):
    for number, letter in mname.items():
       if number == month:
          return letter
+
+# Función para encontrar el "last seen"
+def useen(nickname):
+   un = UNDB_Connector()
+   un_c = un.connect("seen.udb")
+   if (un_c == True):
+      udb_s = open("seen.udb", 'rb')
+      s_found = False
+      s_cfound = False
+      for line in udb_s:
+         s_expl = line.split("%%!%%")
+         if s_expl[0].rstrip().lower() == nickname.rstrip().lower():
+            s_mask = s_expl[1]
+            s_time = s_expl[2]
+            s_chan = s_expl[3]
+            s_found = True
+      if s_found != True:
+         return False
+      else:
+         return [s_mask, s_time, s_chan]
+      un.save("seen.udb")
          
 # Creamos el socket "irc"
 irc = socket.socket ( socket.AF_INET, socket.SOCK_STREAM )
@@ -165,6 +186,29 @@ while True:
    rparams = ' '.join(params)
    if ex[0] == "PING":
 	   irc.send ("PONG " + ex[1] + "\r\n")
+   
+   # On Join, para &seen
+   if ex[1] == "JOIN":
+      imask = ex[0].split("!")[0]
+      inick = imask[1:]
+      UC = UNDB_Connector()
+      UC.connect("seen.udb")
+      found = False
+      file = open("cache.ucb", 'r')
+      newfile = []
+      for line in file:
+         if line.split('%%!%%')[0].lower() == re.escape(inick).rstrip().lower():
+            line = inick + "%%!%%" + ex[0][1:] + "%%!%%" + time.asctime( time.localtime(time.time()) ) + "%%!%%" + ex[2]
+            found = True
+         newfile.append(line.rstrip() + "\n")
+      if found == False:
+         nline = inick + "%%!%%" + ex[0][1:] + "%%!%%" + time.asctime( time.localtime(time.time()) ) + "%%!%%" + ex[2] + "\n"
+         newfile.append(nline)
+      file.close()
+      fole = open("cache.ucb", "w")
+      fole.write("".join(newfile))
+      fole.close()
+      UC.save("seen.udb")
    if ex[1] == "PRIVMSG":
       masktemp = ex[0].replace(chr(58), '')
       # mask[0] => nick
@@ -223,6 +267,20 @@ while True:
          else:
             privmsg (achan, perror)
       
+      # seen
+      if (ex[3].lower() == ":&seen"):
+         if len(ex) <= 4:
+            privmsg(achan, chr(2) + mask[0] + chr(2) + ", ¡la sintaxis del comando es " + chr(3) + "12&seen nick" + chr(3) + "!")
+         else:
+            vseen = useen(ex[4].rstrip())
+            if vseen == False:
+               privmsg(achan, "El usuario no se ha podido encontrar en la base de datos.")
+            else:
+               smask = vseen[0]
+               stime = vseen[1]
+               schan = vseen[2]
+               privmsg(achan, "El usuario " + chr(2) + ex[4] + chr(2) + " fue visto por última vez el " + chr(3) + "12" + stime + chr(15) + " en el canal " + chr(3) + "12" + schan + chr(15) + ", bajo la máscara " + chr(3) + "12" + smask + chr(15) + ".")
+         
       if (ex[3].lower() == ":&cats") or (ex[3].lower() == ":&gatos"):
          if len(ex) <= 4:
             privmsg(achan, chr(2) + mask[0] + chr(2) + ", ¡la sintaxis del comando es " + chr(3) + "12&cats [idioma:][proyecto:]artículo" + chr(3) + "!")
@@ -471,7 +529,7 @@ while True:
                   file = open("cache.ucb", 'r')
                   newfile = []
                   for line in file:
-                     if line.split('~!')[0] == re.escape(ex[4]).rstrip():
+                     if line.split('~!')[0].lower() == re.escape(ex[4]).rstrip().lower():
                         line =  line.rstrip() + "~!" + mask[0]
                         found = True
                      newfile.append(line.rstrip() + "\n")
