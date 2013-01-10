@@ -19,7 +19,7 @@ network = 'irc.freenode.net'
 # Puerto
 port = 6667
 # Nick
-nick = 'unbotS'
+nick = 'unbot'
 # Realname
 realname = 'Shiva 13.04 Beta'
 # Ident
