@@ -19,7 +19,7 @@ network = 'irc.freenode.net'
 # Puerto
 port = 6667
 # Nick
-nick = 'unbot'
+nick = 'unabota'
 # Realname
 realname = 'Shiva 13.04 Beta'
 # Ident
@@ -43,9 +43,9 @@ deflang = 'es'
 # Nombres de los meses
 mname = {'01': 'enero', '02': 'febrero', '03': 'marzo', '04': 'abril', '05': 'mayo', '06': 'junio', '07': 'julio', '08': 'agosto', '09': 'septiembre', '10': 'octubre', '11': 'noviembre', '12': 'diciembre'}
 # Descripcion de los comandos
-descs = {'join': 'Entra a un canal. Solo para administradores.', 'part': 'Sale de un canal. Solo para administradores.', 'ping': 'Te responde con pong.', 'nas': 'Sin parámetros, te muestra los nicks asignados a tu cuenta. Si especificas una cuenta como parámetro, añade tu nick a ella (si no está asignado ya a otra).', 'ip': 'Muestra información sobre una IP.', 'gatos': 'Muestra las categorías de un artículo.', 'cats': 'Muestra las categorías de un artículo.', 'awiki': 'Muestra la URL de un enlace wiki.', 'info': 'Con parámetros, muestra información del nick dado. Sin parámetros, muestra la de tu nick. Si el nick tiene una cuenta asociada, muestra su información.', 'quit': 'Sale del IRC. Sólo para administradores.'}
+descs = {'join': 'Entra a un canal. Solo para administradores.', 'part': 'Sale de un canal. Solo para administradores.', 'ping': 'Te responde con pong.', 'nas': 'Sin parámetros, te muestra los nicks asignados a tu cuenta. Si especificas una cuenta como parámetro, añade tu nick a ella (si no está asignado ya a otra).', 'ip': 'Muestra información sobre una IP.', 'gatos': 'Muestra las categorías de un artículo.', 'cats': 'Muestra las categorías de un artículo.', 'awiki': 'Muestra la URL de un enlace wiki.', 'info': 'Con parámetros, muestra información del nick dado. Sin parámetros, muestra la de tu nick. Si el nick tiene una cuenta asociada, muestra su información.', 'seen': 'Muestra datos (máscara, fecha, hora y canal) sobre la vez que el bot vio al nick dado entrar a un canal o hablar.', 'quit': 'Sale del IRC. Sólo para administradores.'}
 # Uso de los comandos
-usos = {'join': '&join <#canal>', 'part': '&part <#canal>', 'ping': '&ping', 'nas': '&nas [cuenta]', 'awiki': '&awiki [idioma:][proyecto:]<artículo>', 'cats': '&cats [idioma:][proyecto:]<artículo>', 'gatos': '&gatos [idioma:][proyecto:]<artículo>', 'info': '&info [[idioma:][proyecto:]<nick>]', 'ip': '&ip xxx.xxx.xxx.xxx', 'quit': '&quit'}
+usos = {'join': '&join <#canal>', 'part': '&part <#canal>', 'ping': '&ping', 'nas': '&nas [cuenta]', 'awiki': '&awiki [idioma:][proyecto:]<artículo>', 'cats': '&cats [idioma:][proyecto:]<artículo>', 'gatos': '&gatos [idioma:][proyecto:]<artículo>', 'info': '&info [[idioma:][proyecto:]<nick>]', 'ip': '&ip xxx.xxx.xxx.xxx', 'seen': '&seen', 'quit': '&quit'}
 ###################
 #    Funciones    #
 ###################
@@ -226,7 +226,27 @@ while True:
          tempsp = ex[3].split(':')
          tempsp = tempsp[1:]
          primera = ':'.join(tempsp)
-         
+      else:
+         imask = ex[0].split("!")[0]
+         inick = imask[1:]
+         UC = UNDB_Connector()
+         UC.connect("seen.udb")
+         found = False
+         file = open("cache.ucb", 'r')
+         newfile = []
+         for line in file:
+            if line.split('%%!%%')[0].lower() == re.escape(inick).rstrip().lower():
+               line = inick + "%%!%%" + ex[0][1:] + "%%!%%" + time.asctime( time.localtime(time.time()) ) + "%%!%%" + ex[2]
+               found = True
+            newfile.append(line.rstrip() + "\n")
+         if found == False:
+            nline = inick + "%%!%%" + ex[0][1:] + "%%!%%" + time.asctime( time.localtime(time.time()) ) + "%%!%%" + ex[2] + "\n"
+            newfile.append(nline)
+         file.close()
+         fole = open("cache.ucb", "w")
+         fole.write("".join(newfile))
+         fole.close()
+         UC.save("seen.udb")
       # @Debug: Test command
       if ex[3].lower() == ":&ping":
          privmsg (achan, mask[0] + ", ¡PONG!")
